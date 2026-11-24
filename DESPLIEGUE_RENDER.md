@@ -29,7 +29,7 @@ Folio se despliega en Render con **Docker** (Render no tiene entorno nativo de P
 
    `FOLIO_TOKEN` lo genera Render y `FOLIO_DATA_DIR` ya viene puesto.
 3. Pulse *Apply* y espere el primer despliegue (varios minutos).
-4. Abra la URL `https://…onrender.com`. El navegador pide el usuario y la contraseña del paso 2.
+4. Abra la URL `https://…onrender.com`. Aparece una página de **ingreso**: escriba el usuario y la contraseña del paso 2. La sesión dura 12 horas; `/salir.php` la cierra.
 
 La URL pública la toma Folio de `RENDER_EXTERNAL_URL`, que entrega Render. De ella salen el QR, los enlaces y la dirección del WSDL. Si algún enlace saliera con otra dirección, cree la variable `FOLIO_BASE_URL` con la URL completa (sin barra final).
 
