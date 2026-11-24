@@ -23,6 +23,7 @@ $base = [
     'brevo_remitente_email' => getenv('FOLIO_BREVO_REMITENTE') ?: '', // debe estar verificado en Brevo
     'brevo_remitente_nombre' => 'Folio Facturación',
     'brevo_url' => 'https://api.brevo.com/v3/smtp/email',
+    'max_correos_dia' => (int) (getenv('FOLIO_MAX_CORREOS_DIA') ?: 30), // tope de correos por día con Brevo o SMTP (Brevo gratis permite 300)
     // Envío directo por SMTP (por ejemplo Gmail con contraseña de aplicación). Se usa si no hay clave de Brevo.
     'smtp_host' => getenv('FOLIO_SMTP_HOST') ?: '',
     'smtp_puerto' => 465,

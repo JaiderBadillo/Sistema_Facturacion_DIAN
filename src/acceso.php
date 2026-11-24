@@ -46,6 +46,10 @@ function acceso_pagina_login(string $siguiente, ?string $error): void
 /** Devuelve true si la petición puede continuar; false si ya se respondió (login, redirección, 401, 503). */
 function acceso_controlar(string $ruta): bool
 {
+    // Decisión explícita de dejar el sitio abierto (sin ingreso). Ver los riesgos en DESPLIEGUE_RENDER.md.
+    if (filter_var(getenv('FOLIO_ACCESO_ABIERTO'), FILTER_VALIDATE_BOOLEAN)) {
+        return true;
+    }
     $usuario = trim((string) getenv('FOLIO_USUARIO'));
     $clave = trim((string) getenv('FOLIO_CLAVE'));
     if ($usuario === '' || $clave === '') {

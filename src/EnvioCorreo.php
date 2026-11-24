@@ -8,6 +8,12 @@ final class EnvioCorreo
     public const PLAZO_HORAS = 48;
     private const ESPERA_ENTRE_INTENTOS = 60; // segundos, para los reintentos automáticos
 
+    private static function enviadosHoy(Repositorio $repo): int
+    {
+        $hoy = date('Y-m-d');
+        return count(array_filter($repo->listarEstadosCorreo(), fn($e) => ($e['estado'] ?? '') === 'ENVIADO' && str_starts_with((string) ($e['fecha'] ?? ''), $hoy)));
+    }
+
     /** Envía por Brevo o por SMTP (el primero configurado) o pide el envío a n8n, y registra el estado. @return array{ok: bool, detalle: string, modo: string} */
     public static function solicitar(Repositorio $repo, array $f, array $config): array
     {
@@ -20,7 +26,9 @@ final class EnvioCorreo
         ]);
         $modo = NotificadorBrevo::configurado($config) ? 'brevo' : (NotificadorSmtp::configurado($config) ? 'smtp' : 'n8n');
         try {
-            if ($modo === 'n8n') {
+            if ($modo !== 'n8n' && self::enviadosHoy($repo) >= ($config['max_correos_dia'] ?? 30)) {
+                $r = ['ok' => false, 'detalle' => "Se alcanzó el tope diario de {$config['max_correos_dia']} correos; se reintenta más tarde."];
+            } elseif ($modo === 'n8n') {
                 $r = (new NotificadorN8n($config))->enviar($f);
             } else {
                 $contenedor = Documentos::contenedor($f, $repo, $config) ?? throw new RuntimeException('Falta el XML de la factura.');

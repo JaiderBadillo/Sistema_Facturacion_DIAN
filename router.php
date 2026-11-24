@@ -2,6 +2,12 @@
 declare(strict_types=1);
 
 $ruta = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+header('X-Robots-Tag: noindex, nofollow'); // el sitio es una demostración: que los buscadores no lo listen
+if ($ruta === '/robots.txt') {
+    header('Content-Type: text/plain; charset=utf-8');
+    echo "User-agent: *\nDisallow: /\n";
+    return;
+}
 
 // Acceso (ver src/acceso.php): formulario de ingreso en /login.php; Basic para el servicio SOAP.
 require __DIR__ . '/src/acceso.php';

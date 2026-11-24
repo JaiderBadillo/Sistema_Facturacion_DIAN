@@ -7,11 +7,13 @@ services:
     plan: free
     healthCheckPath: /folio.css      # ruta pública; las demás piden usuario y contraseña
     envVars:
-      # Acceso al sitio: obligatorios en Render, el sitio no responde sin ellos.
-      - key: FOLIO_USUARIO
-        sync: false
-      - key: FOLIO_CLAVE
-        sync: false
+      # Acceso: el sitio está abierto (sin ingreso). Para pedir usuario y contraseña, ponga
+      # FOLIO_ACCESO_ABIERTO=false y cree FOLIO_USUARIO y FOLIO_CLAVE; sin ninguno de los dos, el sitio responde 503.
+      - key: FOLIO_ACCESO_ABIERTO
+        value: "true"
+      # Tope de correos por día (protege la cuenta de Brevo mientras el sitio esté abierto).
+      - key: FOLIO_MAX_CORREOS_DIA
+        value: "30"
       # Correo por Brevo (API HTTPS; Render bloquea SMTP en el plan gratuito).
       - key: FOLIO_BREVO_KEY
         sync: false
