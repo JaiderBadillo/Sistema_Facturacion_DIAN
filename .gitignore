@@ -1,0 +1,12 @@
+# Secretos y datos locales: nunca se suben
+/config.local.php
+/data/*
+!/data/facturas/
+/data/facturas/*
+!/data/facturas/.gitkeep
+
+# Entregables del curso y archivos ajenos al proyecto
+/entregables/
+/.kombai/
+/Autenticacion_WiFi_Grupo11.pdf
+*.log

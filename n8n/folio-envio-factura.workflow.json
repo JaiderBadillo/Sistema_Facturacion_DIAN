@@ -1,0 +1,236 @@
+{
+  "name": "Folio · Enviar factura por correo",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "folio-factura",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook · Factura aprobada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        200,
+        300
+      ],
+      "webhookId": "folio-factura"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.urls.pdf }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "pdf"
+            }
+          }
+        }
+      },
+      "id": "descarga-pdf",
+      "name": "Descargar PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.body.urls.xml }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "xml"
+            }
+          }
+        }
+      },
+      "id": "descarga-xml",
+      "name": "Descargar XML contenedor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "merge",
+      "name": "Unir PDF y XML",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        700,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "Folio Facturación <facturacion@folio.local>",
+        "toEmail": "={{ $('Webhook · Factura aprobada').first().json.body.receptor.correo }}",
+        "subject": "={{ 'Factura electrónica ' + $('Webhook · Factura aprobada').first().json.body.numero + ' · ' + $('Webhook · Factura aprobada').first().json.body.emisor.nombre }}",
+        "emailFormat": "html",
+        "html": "=<div style=\"font-family:Georgia,serif;color:#1d1d1b;max-width:560px\"><h2 style=\"margin:0 0 8px\">Factura electrónica {{ $('Webhook · Factura aprobada').first().json.body.numero }}</h2><p>Hola {{ $('Webhook · Factura aprobada').first().json.body.receptor.nombre }},</p><p><strong>{{ $('Webhook · Factura aprobada').first().json.body.emisor.nombre }}</strong> (NIT {{ $('Webhook · Factura aprobada').first().json.body.emisor.nit }}) le envía su factura electrónica de venta.</p><table style=\"border-collapse:collapse;width:100%;font-size:14px\"><tr><td style=\"padding:6px;border-bottom:1px solid #ddd\">Número</td><td style=\"padding:6px;border-bottom:1px solid #ddd\"><strong>{{ $('Webhook · Factura aprobada').first().json.body.numero }}</strong></td></tr><tr><td style=\"padding:6px;border-bottom:1px solid #ddd\">Fecha de emisión</td><td style=\"padding:6px;border-bottom:1px solid #ddd\">{{ $('Webhook · Factura aprobada').first().json.body.fecha }}</td></tr><tr><td style=\"padding:6px;border-bottom:1px solid #ddd\">Total</td><td style=\"padding:6px;border-bottom:1px solid #ddd\"><strong>{{ Number($('Webhook · Factura aprobada').first().json.body.total).toLocaleString('es-CO', {style: 'currency', currency: 'COP'}) }}</strong></td></tr><tr><td style=\"padding:6px\">Código de seguridad</td><td style=\"padding:6px;font-size:11px;word-break:break-all\">{{ $('Webhook · Factura aprobada').first().json.body.cufe }}</td></tr></table><p>Adjuntamos dos archivos: el <strong>PDF</strong> (representación gráfica) y el <strong>XML contenedor</strong> (la factura junto con su respuesta de validación), que es el documento con validez. Conserve ambos. El código QR del PDF permite verificar la factura.</p><p style=\"color:#777;font-size:12px\">Mensaje automático de Folio, simulación académica de facturación electrónica (UTS). No responda a este correo.</p></div>",
+        "options": {
+          "attachments": "pdf,xml",
+          "appendAttribution": false
+        }
+      },
+      "id": "correo",
+      "name": "Enviar correo (SMTP)",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2.1,
+      "position": [
+        960,
+        300
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "CONFIGURAR",
+          "name": "SMTP Folio"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Webhook · Factura aprobada').first().json.body.callback.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Folio-Token",
+              "value": "={{ $('Webhook · Factura aprobada').first().json.body.callback.token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ numero: $('Webhook · Factura aprobada').first().json.body.numero, estado: 'ENVIADO', detalle: 'Correo enviado por SMTP' }) }}",
+        "options": {}
+      },
+      "id": "cb-enviado",
+      "name": "Informar a Folio: ENVIADO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('Webhook · Factura aprobada').first().json.body.callback.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-Folio-Token",
+              "value": "={{ $('Webhook · Factura aprobada').first().json.body.callback.token }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ numero: $('Webhook · Factura aprobada').first().json.body.numero, estado: 'FALLIDO', detalle: String($json.error ?? 'Error al enviar el correo') }) }}",
+        "options": {}
+      },
+      "id": "cb-fallido",
+      "name": "Informar a Folio: FALLIDO",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        400
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook · Factura aprobada": {
+      "main": [
+        [
+          {
+            "node": "Descargar PDF",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Descargar XML contenedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar PDF": {
+      "main": [
+        [
+          {
+            "node": "Unir PDF y XML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar XML contenedor": {
+      "main": [
+        [
+          {
+            "node": "Unir PDF y XML",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Unir PDF y XML": {
+      "main": [
+        [
+          {
+            "node": "Enviar correo (SMTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enviar correo (SMTP)": {
+      "main": [
+        [
+          {
+            "node": "Informar a Folio: ENVIADO",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Informar a Folio: FALLIDO",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

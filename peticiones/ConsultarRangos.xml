@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:fac="http://uts.edu.co/facturacion">
+  <soapenv:Header/>
+  <soapenv:Body>
+    <fac:ConsultarRangosRequest>
+      <fac:nit>900123456</fac:nit>
+    </fac:ConsultarRangosRequest>
+  </soapenv:Body>
+</soapenv:Envelope>

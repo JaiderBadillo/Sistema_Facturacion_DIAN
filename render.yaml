@@ -1,0 +1,31 @@
+# Blueprint de Render para Folio (simulador de facturación electrónica).
+# Pasos completos en DESPLIEGUE_RENDER.md.
+services:
+  - type: web
+    name: sistema-facturacion-dian
+    runtime: docker
+    plan: free
+    healthCheckPath: /folio.css      # ruta pública; las demás piden usuario y contraseña
+    envVars:
+      # Acceso al sitio: obligatorios en Render, el sitio no responde sin ellos.
+      - key: FOLIO_USUARIO
+        sync: false
+      - key: FOLIO_CLAVE
+        sync: false
+      # Correo por Brevo (API HTTPS; Render bloquea SMTP en el plan gratuito).
+      - key: FOLIO_BREVO_KEY
+        sync: false
+      - key: FOLIO_BREVO_REMITENTE   # remitente verificado en Brevo
+        sync: false
+      # Secreto para los reintentos y callbacks; Render lo genera.
+      - key: FOLIO_TOKEN
+        generateValue: true
+      # Datos. En el plan gratuito son temporales: se pierden al reiniciar o redesplegar.
+      - key: FOLIO_DATA_DIR
+        value: /app/data/facturas
+    # Para conservar los datos hace falta un plan de pago con disco:
+    # 1) cambie plan: free por plan: starter, 2) descomente el disco y 3) ponga FOLIO_DATA_DIR=/var/data/facturas
+    # disk:
+    #   name: folio-datos
+    #   mountPath: /var/data
+    #   sizeGB: 1

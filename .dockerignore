@@ -1,0 +1,8 @@
+.git
+.kombai
+data
+entregables
+config.local.php
+*.pdf
+*.md
+!README.md
