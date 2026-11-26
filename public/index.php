@@ -136,7 +136,7 @@ $titulo = match ($vista) {
 <a class="back" href="/index.php">← Volver al registro</a>
 <div class="heading inner"><div><p class="kicker">Facturación electrónica</p><h1><?= h($titulo) ?></h1></div></div>
 <?php if ($vista === 'nueva'): ?>
-<form id="emision" data-cliente="<?= h($_GET['cliente'] ?? '') ?>"><noscript>Activa JavaScript para enviar desde el navegador o utiliza el cliente SOAP de consola.</noscript>
+<form id="emision" data-cliente="<?= h($_GET['cliente'] ?? '') ?>" data-autocorreo="<?= NotificadorBrevo::configurado($config) || NotificadorSmtp::configurado($config) ? '1' : '' ?>"><noscript>Activa JavaScript para enviar desde el navegador o utiliza el cliente SOAP de consola.</noscript>
 <div class="form-grid">
 <fieldset><legend>Datos de emisión</legend>
 <label>Emisor<select name="nit" required><?php foreach ($emisores as $emisor): $r = $repo->obtenerRangos($emisor['nit']); ?>

@@ -21,7 +21,7 @@ if errorlevel 1 (
 
 rem Cargar solo los modulos que falten, sin editar el php.ini del equipo.
 set "FOLIO_MODULOS="
-for %%M in (soap openssl) do call :modulo %%M
+for %%M in (soap openssl mbstring) do call :modulo %%M
 set "FOLIO_EXTDIR="
 call :requisitos >nul 2>&1
 if not errorlevel 1 goto :configuracion
@@ -89,7 +89,7 @@ if errorlevel 1 set "FOLIO_MODULOS=%FOLIO_MODULOS% -d extension=%~1"
 exit /b 0
 
 :requisitos
-"%FOLIO_PHP%" %FOLIO_EXTDIR% %FOLIO_MODULOS% -r "foreach (['soap','dom','libxml','SimpleXML','openssl'] as $m) { if (!extension_loaded($m)) { fwrite(STDERR, 'Falta la extension PHP: '.$m.PHP_EOL); exit(1); } }"
+"%FOLIO_PHP%" %FOLIO_EXTDIR% %FOLIO_MODULOS% -r "foreach (['soap','dom','libxml','SimpleXML','openssl','mbstring'] as $m) { if (!extension_loaded($m)) { fwrite(STDERR, 'Falta la extension PHP: '.$m.PHP_EOL); exit(1); } }"
 exit /b %errorlevel%
 
 :responde

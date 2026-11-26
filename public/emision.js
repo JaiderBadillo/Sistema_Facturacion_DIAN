@@ -22,7 +22,7 @@ function syncCorreo() {
     const client = (clients[fields.nit.value] || []).find(c => c.identificacion === fields.receptor.value);
     const box = document.querySelector('#enviar-correo');
     box.disabled = !client?.correo;
-    box.checked = !!client?.correo;
+    box.checked = !!client?.correo && form.dataset.autocorreo === '1'; // sin envío configurado no se marca solo, para no dejar facturas en contingencia
     document.querySelector('#correo-cliente').textContent = client?.correo ? 'Se enviará a ' + client.correo : 'Este cliente no tiene correo registrado. Agrega uno nuevo con su correo para poder enviarle la factura.';
 }
 function setIssuer() {
